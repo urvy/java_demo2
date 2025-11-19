@@ -1,0 +1,16 @@
+---
+- name: Deploy application to Kubernetes
+  hosts: localhost
+  tasks:
+    - name: Apply Kubernetes Deployment
+      kubernetes.core.k8s:
+        kubeconfig: ~/.kube/config
+        state: present
+        namespace: default
+        definition: "{{ lookup('file', 'deployment.yaml') }}"
+    - name: Apply Kubernetes Service
+      kubernetes.core.k8s:
+        kubeconfig: ~/.kube/config
+        state: present
+        namespace: default
+        definition: "{{ lookup('file', 'service.yaml') }}"
