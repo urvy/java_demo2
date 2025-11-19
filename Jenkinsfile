@@ -1,85 +1,79 @@
-pipeline {
+pipeline { 
 
-    agent any
- 
-    environment {
+agent any 
 
-        AWS_REGION = 'us-east-1'
+environment { 
 
-        ECR_REPO = '854681582780.dkr.ecr.us-east-1.amazonaws.com/java_demo'
+AWSREGION = 'us-east-1' 
 
-    }
- 
-    stages {
+ECRREPO = '854681582780.dkr.ecr.us-east-1.amazonaws.com/java_demo' 
 
-        stage('Checkout Code') {
+} 
 
-            steps {
+stages { 
 
-                git branch: 'main', url: 'https://github.com/urvy/java_demo2.git'
+stage('Checkout Code') { 
 
-            }
-
-        }
- 
-        stage('Build with Maven') {
-
-            steps {
-
-                sh 'mvn clean install'
-
-            }
-
-        }
- 
-        stage('Build Docker Image') {
-
-            steps {
-
-                sh 'docker build -t my-app:latest .'
-
-            }
-
-        }
- 
-        stage('Login to Amazon ECR') {
-
-            steps {
-
-                withAWS(region: "${AWS_REGION}", credentials: 'aws-creds') {
-
-                    sh """
-
-                        aws ecr get-login-password --region ${AWS_REGION} | \
-
-                        docker login --username AWS --password-stdin ${ECR_REPO}
-
-                    """
-
-                }
-
-            }
-
-        }
- 
-        stage('Push Docker Image to ECR') {
-
-            steps {
-
-                sh """
-
-                    docker tag my-app:latest ${ECR_REPO}:latest
-
-                    docker push ${ECR_REPO}:latest
-
-                """
-
-            }
-
-        }
-
-    }
-
-}
+steps { 
 
 
+
+                git 'https://github.com/urvy/java_demo2.git' 
+
+            } 
+
+        } 
+
+        stage('Build with Maven') { 
+
+            steps { 
+
+                sh 'mvn clean install' 
+
+            } 
+
+        } 
+
+        stage('Generate JAR') { 
+
+            steps { 
+
+                echo 'JAR generated in target directory' 
+
+            } 
+
+        } 
+
+        stage('Build Docker Image') { 
+
+            steps { 
+
+                sh 'docker build -t my-app .' 
+
+            } 
+
+        } 
+
+        stage('Login to AWS ECR') { 
+
+            steps { 
+
+                sh 'aws ecr get-login-password --region $AWSREGION | docker login --username AWS -
+
+password-stdin $ECRREPO' 
+
+            } 
+
+        } 
+
+        stage('Tag & Push Docker Image') { 
+
+            steps { 
+
+                sh 'docker tag my-app:latest $ECRREPO:latest' 
+
+                sh 'docker push $ECRREPO:latest' 
+
+            } 
+
+        } 
